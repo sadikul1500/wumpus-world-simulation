@@ -263,7 +263,7 @@ class Logic:
 			self.world.board[m][n].wumpusValue += 10 #sure about wumpus
 			if self.world.numberOfArrow > 0: #adjacent
 				print("shoooot at ", m, n)
-				messagebox.showinfo("Winner", "shooooooot at " +str(rv[0]) +"," str(rv[1]))
+				messagebox.showinfo("Winner", "shooooooot at " +str(m) +", " +str(n))
 				self.world.numberOfArrow -= 1
 				self.world.board[m][n].wumpus = False
 				self.removeStench(m, n)
@@ -374,7 +374,7 @@ class Logic:
 					rv = st
 			
 			print("shooooooot at ", rv[0], rv[1])
-			messagebox.showinfo("Winner", "shooooooot at " +str(rv[0]) +"," str(rv[1]))
+			messagebox.showinfo("Winner", "shooooooot at " +str(rv[0]) +", " + str(rv[1]))
 
 			self.world.numberOfArrow -= 1
 			if self.world.board[rv[0]][rv[1]].wumpus == True:
