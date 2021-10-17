@@ -145,6 +145,7 @@ class Logic:
 		if self.world.board[r][c].wumpus == True: #self.world.board[r][c].wumpusValue >= 2 or
 			
 			print("agent was killed by wumpus")
+			return True
 		else:
 			self.world.board[r][c].wumpusValue = -100
 			self.updateWumpusValue([r,c])
@@ -262,8 +263,9 @@ class Logic:
 		if x == y-1:
 			self.world.board[m][n].wumpusValue += 10 #sure about wumpus
 			if self.world.numberOfArrow > 0: #adjacent
-				print("shoooot at ", m, n)
-				messagebox.showinfo("Winner", "shooooooot at " +str(m) +", " +str(n))
+				#time.sleep(2)
+				print("shoooot at ", m, n, " from ", r, c)
+				messagebox.showinfo("shootSt", "shooooooot at " +str(m) +", " +str(n)+ ' from ' +str(r)+', '+str(c))
 				self.world.numberOfArrow -= 1
 				self.world.board[m][n].wumpus = False
 				self.removeStench(m, n)
@@ -284,7 +286,7 @@ class Logic:
 		stack2 = [] #shoot with arrow
 		stack3 = [] #take risk for pit
 
-		if c+1 < 10 and self.world.board[r][c+1].pitValue <= 0 and self.world.board[r][c+1].wumpusValue <= 0 and self.world.board[r][c+1].visitedValue < 3:
+		if c+1 < 10 and self.world.board[r][c+1].pitValue <= 0 and self.world.board[r][c+1].wumpusValue <= 0 and self.world.board[r][c+1].visitedValue < 5:
 			stack1.append([r, c+1]) #right
 			# if self.world.board[r][c+1].move - 1 == self.world.board[r][c].move:
 			# 	self.world.board[r][c+1].weight += 2
@@ -293,36 +295,36 @@ class Logic:
 		elif c+1 < 10 and self.world.board[r][c+1].pitValue <= 0 and self.world.board[r][c+1].wumpusValue > 0 and self.world.board[r][c+1].visitedValue < 7:
 			stack2.append([r, c+1]) #stack1
 
-		elif c+1 < 10 and self.world.board[r][c+1].pitValue > 0 and self.world.board[r][c+1].visitedValue < 7:
+		elif c+1 < 10 and self.world.board[r][c+1].pitValue > 0 and self.world.board[r][c+1].visitedValue <= 9:
 			stack3.append([r, c+1]) #stack1
 
 		
-		if r-1 >= 0 and self.world.board[r-1][c].pitValue <= 0 and self.world.board[r-1][c].wumpusValue <= 0 and self.world.board[r-1][c].visitedValue < 3:
+		if r-1 >= 0 and self.world.board[r-1][c].pitValue <= 0 and self.world.board[r-1][c].wumpusValue <= 0 and self.world.board[r-1][c].visitedValue < 5:
 			stack1.append([r-1, c])
 
 		elif r-1 >= 0 and self.world.board[r-1][c].pitValue <= 0 and self.world.board[r][c+1].wumpusValue > 0 and self.world.board[r-1][c].visitedValue < 7:
 			stack2.append([r-1, c])
 
-		elif r-1 >= 0 and self.world.board[r-1][c].pitValue > 0 and self.world.board[r-1][c].visitedValue < 7:
+		elif r-1 >= 0 and self.world.board[r-1][c].pitValue > 0 and self.world.board[r-1][c].visitedValue <= 9:
 			stack3.append([r-1, c]) #stack1
 
 
-		if c-1 >= 0 and self.world.board[r][c-1].pitValue <= 0 and self.world.board[r][c-1].wumpusValue <= 0 and self.world.board[r][c-1].visitedValue < 3:
+		if c-1 >= 0 and self.world.board[r][c-1].pitValue <= 0 and self.world.board[r][c-1].wumpusValue <= 0 and self.world.board[r][c-1].visitedValue < 5:
 			stack1.append([r, c-1])
 
 		elif c-1 >= 0 and self.world.board[r][c-1].pitValue <= 0 and self.world.board[r][c-1].wumpusValue > 0 and self.world.board[r][c-1].visitedValue < 7:
 			stack2.append([r, c-1])
 
-		elif c-1 >= 0 and self.world.board[r][c-1].pitValue > 0 and self.world.board[r][c-1].visitedValue < 7:
+		elif c-1 >= 0 and self.world.board[r][c-1].pitValue > 0 and self.world.board[r][c-1].visitedValue <= 9:
 			stack3.append([r, c-1])
 
-		if r+1 < 10 and self.world.board[r+1][c].pitValue <= 0 and self.world.board[r+1][c].wumpusValue <= 0 and self.world.board[r+1][c].visitedValue < 3:
+		if r+1 < 10 and self.world.board[r+1][c].pitValue <= 0 and self.world.board[r+1][c].wumpusValue <= 0 and self.world.board[r+1][c].visitedValue < 5:
 			stack1.append([r+1, c])
 
 		elif r+1 < 10 and self.world.board[r+1][c].pitValue <= 0 and self.world.board[r][c+1].wumpusValue > 0 and self.world.board[r+1][c].visitedValue < 7:
 			stack2.append([r+1, c])
 
-		elif r+1 < 10 and self.world.board[r+1][c].pitValue > 0 and self.world.board[r+1][c].visitedValue < 7:
+		elif r+1 < 10 and self.world.board[r+1][c].pitValue > 0 and self.world.board[r+1][c].visitedValue <= 9:
 			stack3.append([r+1, c])
 
 		return stack1, stack2, stack3
@@ -335,7 +337,7 @@ class Logic:
 		# if self.world.board[i][j].wumpusValue <= 0:
 		# 	return 0
 		elif self.world.board[i][j].move == moveNo-1:
-			return 3
+			return 2
 		else:
 			return 1 #-2
 
@@ -358,14 +360,62 @@ class Logic:
 
 
 
+	def moveArrow(self, a, b, x, y): #x,y to a,b
+		if a == x: #row
+			if b>y: #right side
+				for i in range(b, 10):
+					if self.world.board[a][i].wumpus == True:
+						print("wumpus killed at ", a, i)
+						self.world.board[a][i].wumpus = False
+						self.world.board[a][i].wumpusValue -= 100
+						self.updateCells([a, i])
+						break
+				else:
+					print('arrow missed')
+			else:
+				for i in range(b, -1, -1): #left side
+					if self.world.board[a][i].wumpus == True:
+						print("wumpus killed at ", a, i)
+						self.world.board[a][i].wumpus = False
+						self.world.board[a][i].wumpusValue -= 100
+						self.updateCells([a, i])
+						break
+				else:
+					print('arrow missed')
+
+		if b == y: #cloumn
+			if x>a: #up side
+				for i in range(a, -1, -1):
+					if self.world.board[i][b].wumpus == True:
+						print("wumpus killed at ", i, b)
+						self.world.board[i][b].wumpus = False
+						self.world.board[i][b].wumpusValue -= 100
+						self.updateCells([i, b])
+						break
+				else:
+					print('arrow missed')
+			else:
+				for i in range(a, 10): #down side
+					if self.world.board[i][b].wumpus == True:
+						print("wumpus killed at ", i, b)
+						self.world.board[i][b].wumpus = False
+						self.world.board[i][b].wumpusValue -= 100
+						self.updateCells([i, b])
+						break
+				else:
+					print('arrow missed')
+
+
+
+
 
 	
-	def selectCell2(self, stack): #kill wumpus from outside wumpus cell
+	def selectCell2(self, stack, x, y): #kill wumpus from outside wumpus cell
 		if not stack:
 			return []
 		
 		if self.world.numberOfArrow > 0:
-			
+			print('came')
 			rv = []
 			maxi = -2000
 			for st in stack:
@@ -373,8 +423,10 @@ class Logic:
 					maxi = self.world.board[st[0]][st[1]].wumpusValue
 					rv = st
 			
-			print("shooooooot at ", rv[0], rv[1])
-			messagebox.showinfo("Winner", "shooooooot at " +str(rv[0]) +", " + str(rv[1]))
+			print("shooooooot at ", rv[0], rv[1], ' from ', x, y)
+			#time.sleep(2)
+			messagebox.showinfo("shootCel", "shooooooot at " +str(rv[0]) +", " + str(rv[1])+
+				' from ' + str(x) + ', '+ str(y))
 
 			self.world.numberOfArrow -= 1
 			if self.world.board[rv[0]][rv[1]].wumpus == True:
@@ -385,6 +437,7 @@ class Logic:
 				self.updateCells([rv[0], rv[1]])
 			else:
 				print("no wumpus. arrow missed")
+				self.moveArrow(rv[0], rv[1], x, y)
 				self.updateWumpusValue([rv[0], rv[1]])
 			return rv
 		else:
@@ -447,13 +500,13 @@ class Logic:
 
 
 
-	def choosePath(self, stack1, stack2, stack3, moveNo): #1, stack2
+	def choosePath(self, stack1, stack2, stack3, moveNo, x, y): #1, stack2
 		
 		path = []
 		if len(stack1) > 0:
 			path = self.selectCell(stack1, moveNo)
 		if not path:
-			path = self.selectCell2(stack2)
+			path = self.selectCell2(stack2, x, y)
 		if not path:
 			path = self.selectCell3(stack3)
 
@@ -569,7 +622,7 @@ class Logic:
 			if gameOff == True:
 				break
 			stack1, stack2, stack3 = self.checkAdjacentCell(self.c_loc[0], self.c_loc[1]) #, stack2
-			path = self.choosePath(stack1, stack2, stack3, i) #, stack2 #move number
+			path = self.choosePath(stack1, stack2, stack3, i, self.c_loc[0], self.c_loc[1]) #, stack2 #move number
 
 			if not path:
 				print("can't move")
