@@ -3,6 +3,7 @@ from tkinter import *
 import time
 from tkinter import messagebox
 from playsound import playsound
+from collections import deque
 
 
 
@@ -13,17 +14,17 @@ class Logic:
 		self.world = world
 		self.p_loc = []
 		self.c_loc = [0, 0]
-		#self.move = 0
 		self.world.board[0][0].visited = True
 		self.world.board[0][0].visitedValue += 1
 		self.world.board[0][0].move = 0
-		self.updateBoardForBreeze(0, 0, -1)
-		self.updateBoardForStench(0, 0, -1)
+		#self.updateBoardForBreeze(0, 0, -1)
+		#self.updateBoardForStench(0, 0, -1)
 		self.dir = "right"
 		self.score = 0
 		self.result = None
 		self.label = [ [None]*10 for i in range(10) ] #for UI
-		
+		self.cellList = []
+
 		self.run() 
 
 
@@ -268,6 +269,7 @@ class Logic:
 				messagebox.showinfo("shootSt", "shooooooot at " +str(m) +", " +str(n)+ ' from ' +str(r)+', '+str(c))
 				self.world.numberOfArrow -= 1
 				self.world.board[m][n].wumpus = False
+				self.world.board[m][n].wumpusValue -= 100
 				self.removeStench(m, n)
 				self.updateCells([m, n])
 
@@ -286,45 +288,49 @@ class Logic:
 		stack2 = [] #shoot with arrow
 		stack3 = [] #take risk for pit
 
-		if c+1 < 10 and self.world.board[r][c+1].pitValue <= 0 and self.world.board[r][c+1].wumpusValue <= 0 and self.world.board[r][c+1].visitedValue < 5:
+		if c+1 < 10 and self.world.board[r][c+1].pitValue <= 0 and self.world.board[r][c+1].wumpusValue <= 0 and self.world.board[r][c+1].visitedValue <= 2:
 			stack1.append([r, c+1]) #right
+			self.cellList.append([r, c+1])
 			# if self.world.board[r][c+1].move - 1 == self.world.board[r][c].move:
 			# 	self.world.board[r][c+1].weight += 2
 
 
-		elif c+1 < 10 and self.world.board[r][c+1].pitValue <= 0 and self.world.board[r][c+1].wumpusValue > 0 and self.world.board[r][c+1].visitedValue < 7:
+		elif c+1 < 10 and self.world.board[r][c+1].pitValue <= 0 and self.world.board[r][c+1].wumpusValue > 0 and self.world.board[r][c+1].visitedValue <= 4:
 			stack2.append([r, c+1]) #stack1
 
-		elif c+1 < 10 and self.world.board[r][c+1].pitValue > 0 and self.world.board[r][c+1].visitedValue <= 9:
+		elif c+1 < 10 and self.world.board[r][c+1].pitValue > 0 and self.world.board[r][c+1].visitedValue <= 6:
 			stack3.append([r, c+1]) #stack1
 
 		
-		if r-1 >= 0 and self.world.board[r-1][c].pitValue <= 0 and self.world.board[r-1][c].wumpusValue <= 0 and self.world.board[r-1][c].visitedValue < 5:
+		if r-1 >= 0 and self.world.board[r-1][c].pitValue <= 0 and self.world.board[r-1][c].wumpusValue <= 0 and self.world.board[r-1][c].visitedValue <= 2:
 			stack1.append([r-1, c])
+			self.cellList.append([r, c+1])
 
-		elif r-1 >= 0 and self.world.board[r-1][c].pitValue <= 0 and self.world.board[r][c+1].wumpusValue > 0 and self.world.board[r-1][c].visitedValue < 7:
+		elif r-1 >= 0 and self.world.board[r-1][c].pitValue <= 0 and self.world.board[r-1][c].wumpusValue > 0 and self.world.board[r-1][c].visitedValue <= 4:
 			stack2.append([r-1, c])
 
-		elif r-1 >= 0 and self.world.board[r-1][c].pitValue > 0 and self.world.board[r-1][c].visitedValue <= 9:
+		elif r-1 >= 0 and self.world.board[r-1][c].pitValue > 0 and self.world.board[r-1][c].visitedValue <= 6:
 			stack3.append([r-1, c]) #stack1
 
 
-		if c-1 >= 0 and self.world.board[r][c-1].pitValue <= 0 and self.world.board[r][c-1].wumpusValue <= 0 and self.world.board[r][c-1].visitedValue < 5:
+		if c-1 >= 0 and self.world.board[r][c-1].pitValue <= 0 and self.world.board[r][c-1].wumpusValue <= 0 and self.world.board[r][c-1].visitedValue <= 2:
 			stack1.append([r, c-1])
+			self.cellList.append([r, c+1])
 
-		elif c-1 >= 0 and self.world.board[r][c-1].pitValue <= 0 and self.world.board[r][c-1].wumpusValue > 0 and self.world.board[r][c-1].visitedValue < 7:
+		elif c-1 >= 0 and self.world.board[r][c-1].pitValue <= 0 and self.world.board[r][c-1].wumpusValue > 0 and self.world.board[r][c-1].visitedValue <= 4:
 			stack2.append([r, c-1])
 
-		elif c-1 >= 0 and self.world.board[r][c-1].pitValue > 0 and self.world.board[r][c-1].visitedValue <= 9:
+		elif c-1 >= 0 and self.world.board[r][c-1].pitValue > 0 and self.world.board[r][c-1].visitedValue <= 6:
 			stack3.append([r, c-1])
 
-		if r+1 < 10 and self.world.board[r+1][c].pitValue <= 0 and self.world.board[r+1][c].wumpusValue <= 0 and self.world.board[r+1][c].visitedValue < 5:
+		if r+1 < 10 and self.world.board[r+1][c].pitValue <= 0 and self.world.board[r+1][c].wumpusValue <= 0 and self.world.board[r+1][c].visitedValue <=2:
 			stack1.append([r+1, c])
+			self.cellList.append([r, c+1])
 
-		elif r+1 < 10 and self.world.board[r+1][c].pitValue <= 0 and self.world.board[r][c+1].wumpusValue > 0 and self.world.board[r+1][c].visitedValue < 7:
+		elif r+1 < 10 and self.world.board[r+1][c].pitValue <= 0 and self.world.board[r][c+1].wumpusValue > 0 and self.world.board[r+1][c].visitedValue <= 4:
 			stack2.append([r+1, c])
 
-		elif r+1 < 10 and self.world.board[r+1][c].pitValue > 0 and self.world.board[r+1][c].visitedValue <= 9:
+		elif r+1 < 10 and self.world.board[r+1][c].pitValue > 0 and self.world.board[r+1][c].visitedValue <= 6:
 			stack3.append([r+1, c])
 
 		return stack1, stack2, stack3
@@ -368,6 +374,7 @@ class Logic:
 						print("wumpus killed at ", a, i)
 						self.world.board[a][i].wumpus = False
 						self.world.board[a][i].wumpusValue -= 100
+						self.removeStench(a, i)
 						self.updateCells([a, i])
 						break
 				else:
@@ -378,6 +385,7 @@ class Logic:
 						print("wumpus killed at ", a, i)
 						self.world.board[a][i].wumpus = False
 						self.world.board[a][i].wumpusValue -= 100
+						self.removeStench(a, i)
 						self.updateCells([a, i])
 						break
 				else:
@@ -390,6 +398,7 @@ class Logic:
 						print("wumpus killed at ", i, b)
 						self.world.board[i][b].wumpus = False
 						self.world.board[i][b].wumpusValue -= 100
+						self.removeStench(i, b)
 						self.updateCells([i, b])
 						break
 				else:
@@ -400,6 +409,7 @@ class Logic:
 						print("wumpus killed at ", i, b)
 						self.world.board[i][b].wumpus = False
 						self.world.board[i][b].wumpusValue -= 100
+						self.removeStench(i, b)
 						self.updateCells([i, b])
 						break
 				else:
@@ -423,7 +433,7 @@ class Logic:
 					maxi = self.world.board[st[0]][st[1]].wumpusValue
 					rv = st
 			
-			print("shooooooot at ", rv[0], rv[1], ' from ', x, y)
+			print("shooooooot at cell ", rv[0], rv[1], ' from ', x, y)
 			#time.sleep(2)
 			messagebox.showinfo("shootCel", "shooooooot at " +str(rv[0]) +", " + str(rv[1])+
 				' from ' + str(x) + ', '+ str(y))
@@ -477,34 +487,116 @@ class Logic:
 
 
 
-	def selectCell(self, stack, moveNo):
+	def selectCell(self, stack, moveNo): #select cell with minimum visited value
 		
 		
-		mini = self.world.board[stack[0][0]][stack[0][1]].weight + self.priority(stack[0][0], stack[0][1], moveNo) # avoid infinity loop
-		rv = [stack[0][0], stack[0][1]] #,self.world.board[][stack[0][1]]
+		# mini = self.world.board[stack[0][0]][stack[0][1]].weight + self.priority(stack[0][0], stack[0][1], moveNo) # avoid infinity loop
+		# rv = [stack[0][0], stack[0][1]] #,self.world.board[][stack[0][1]]
+		# for elem in stack:
+		# 	temp = self.world.board[elem[0]][elem[1]].weight + self.priority(elem[0], elem[1], moveNo)
+		# 	if temp < mini:
+		# 	    rv = elem
+		# 	    mini = temp
+		# 	elif temp == mini:
+		# 		if self.world.board[elem[0]][elem[1]].move == self.world.board[rv[0]][rv[1]].move and self.world.board[elem[0]][elem[1]].visitedValue == 0: #to avoid repetation
+		# 			rv = elem
+		# 		elif self.world.board[elem[0]][elem[1]].move > self.world.board[rv[0]][rv[1]].move + 1:
+		# 			rv = elem
+
+
+		# return rv
+		mini = min(2, self.world.board[stack[0][0]][stack[0][1]].visitedValue)
+		cell = []#[stack[0][0], stack[0][1]]
 		for elem in stack:
-			temp = self.world.board[elem[0]][elem[1]].weight + self.priority(elem[0], elem[1], moveNo)
-			if temp < mini:
-			    rv = elem
-			    mini = temp
-			elif temp == mini:
-				if self.world.board[elem[0]][elem[1]].move == self.world.board[rv[0]][rv[1]].move and self.world.board[elem[0]][elem[1]].visitedValue == 0: #to avoid repetation
-					rv = elem
-				elif self.world.board[elem[0]][elem[1]].move > self.world.board[rv[0]][rv[1]].move + 1:
-					rv = elem
+			if self.world.board[elem[0]][elem[1]].visitedValue == 0:
+				return elem
+			if self.world.board[elem[0]][elem[1]].visitedValue <= mini:
+				mini = self.world.board[elem[0]][elem[1]].visitedValue
+				cell = elem
+
+		return cell
 
 
-		return rv
+	def selectCell4(self): #select cell with minimum visited
+		mini = 1000
+		cell = []
+		for l in self.cellList:
+			if self.world.board[l[0]][l[1]].visitedValue <= mini:
+				cell = l
+				mini = self.world.board[l[0]][l[1]].visitedValue
+
+		self.cellList.remove(cell)
+		return cell
+
+
+	
+
+	def returnToCell(self, dst, src): #got to (cell[0],cell[1]) from (x, y) #
+		#pass
+		#if 
+		#bfs
+		#src = [x,y]
+		visited = [src]
+		bfs = deque()
+		bsf = [src]
+		path = []
+
+		while bfs:
+			path = bfs.popleft()
+			last = node[-1]
+			if last == dst:
+				return path
+
+
+
+			r = last[0]
+			c = last[1]
+
+			if r-1>=0 and self.world.board[r-1][c].visitedValue > 0 and [r-1,c] not in visited:
+				visited.append([[r-1,c]])
+				newPath = path.copy()
+				newPath.append([r-1,c])
+				bfs.append(newPath)
+			if c-1>=0 and self.world.board[r][c-1].visitedValue > 0 and [r,c-1] not in visited:
+				visited.append([[r,c-1]])
+				newPath = path.copy()
+				newPath.append([r,c-1])
+				bfs.append(newPath)
+			if r+1<10 and self.world.board[r+1][c].visitedValue > 0 and [r+1,c] not in visited:
+				visited.append([[r+1,c]])
+				newPath = path.copy()
+				newPath.append([r+1,c])
+				bfs.append(newPath)
+			if c+1<10 and self.world.board[r][c+1].visitedValue > 0 and [r,c+1] not in visited:
+				visited.append([[r,c+1]])
+				newPath = path.copy()
+				newPath.append([r,c+1])
+				bfs.append(newPath)
 
 
 
 
 
-	def choosePath(self, stack1, stack2, stack3, moveNo, x, y): #1, stack2
+	def traversePath(self, path):
+		for p in path[1:-1]: #except first and last element
+			self.updateCell(p[0], p[1], True)
+
+
+
+	def choosePath(self, stack1, stack2, stack3, moveNo, x, y): #1, stack2 #x,y current cell
 		
 		path = []
+		#cell = []
 		if len(stack1) > 0:
 			path = self.selectCell(stack1, moveNo)
+		
+		if not path and len(self.cellList)>0:
+			cell = self.selectCell4()
+			path = self.returnToCell(cell, [x,y]) #dst, src
+			if path:
+				self.traversePath(path)
+				return path[-1]
+		
 		if not path:
 			path = self.selectCell2(stack2, x, y)
 		if not path:
@@ -543,16 +635,16 @@ class Logic:
 
 	def animate(self, txt, i, j):
 		if "G" in txt:
-			self.label[i][j].config(bg="#2eb92e", relief="raised") #text=""
+			self.label[i][j].config(bg="#2eb92e", relief="raised", text=txt) #text=""
 			self.world.board[i][j].glitter = False
 			messagebox.showinfo("Winner", "Agent has found gold") #show a win message
 			self.homeComing(i, j)
 		elif "P" in txt:
-			self.label[i][j].config(bg="gray")
+			self.label[i][j].config(bg="gray", text=txt)
 		elif "W" in txt:
-			self.label[i][j].config(bg="#ff8c00")
+			self.label[i][j].config(bg="#ff8c00", text=txt)
 		else:
-			self.label[i][j].config(bg="#bfff80")
+			self.label[i][j].config(bg="#bfff80", text=txt)
 
 
 
@@ -566,13 +658,13 @@ class Logic:
 			pretxt = self.label[i][j].cget("text")
 			#rlf = "sunken"
 			if "G" in pretxt:
-				self.label[i][j].config(bg="#d4d4d4", relief="sunken", text=txt)
+				self.label[i][j].config(bg="#d4d4d4", relief="sunken", text='A'+txt)
 			elif "P" in pretxt:
-				self.label[i][j].config(bg="#d4d4d4", relief="sunken", text=txt)
+				self.label[i][j].config(bg="#d4d4d4", relief="sunken", text='A'+txt)
 			elif "W" in pretxt:
-				self.label[i][j].config(bg="red", relief="sunken", text=txt)
+				self.label[i][j].config(bg="red", relief="sunken", text='A'+txt)
 			else:
-				self.label[i][j].config(bg="#d4d4d4", relief="sunken", text=txt)
+				self.label[i][j].config(bg="#d4d4d4", relief="sunken", text='A'+txt)
 
 			#self.window.after(5000, lambda: self.updateCell(i, j))
 			self.window.update()
